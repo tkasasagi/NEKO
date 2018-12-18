@@ -1,6 +1,6 @@
+image_size 
 FONTPATH = './resource/NotoSansCJKjp-Regular.otf'
 MODELFILE = './model/lowestloss34.pkl'
-IMAGESIZE = 576
 
 from os import listdir
 from skimage import io
@@ -14,12 +14,13 @@ from torchvision.utils import save_image
 import pandas as pd
 from character_set import CharacterSet
 
+
 directory = "./decoder/source/"
 resized_directory = './decoder/images/'
 
 filelist = listdir(directory)
 
-resized = (IMAGESIZE, IMAGESIZE)
+resized = (image_size, image_size)
 
 for i in trange(len(filelist)):
     im = io.imread(directory + filelist[i])
@@ -46,7 +47,7 @@ for file in file_list:
  
     image = np.swapaxes(image, 0, 2) 
     image = np.swapaxes(image, 1, 2)
-    image = np.reshape(image, (1, 3, IMAGESIZE, IMAGESIZE)) 
+    image = np.reshape(image, (1, 3, image_size, image_size)) 
 
     image = torch.from_numpy(image.astype('float32')).cuda() / 255.0
 
@@ -56,8 +57,8 @@ for file in file_list:
     a = a.cpu()
     b = b.cpu()
 
-    for i in range(IMAGESIZE):
-        for j in range(IMAGESIZE):
+    for i in range(image_size):
+        for j in range(image_size):
             max_prob, max_ind = a[:,:,i,j].max(dim=1)
             max_ind = max_ind.item()
             max_prob = max_prob.item()

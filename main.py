@@ -1,6 +1,11 @@
+##### Hyperparameters ##########################################################
+img_size = 576
+lr = 0.0002
+epoch = 100
+################################################################################
 from UNet import *
 import numpy as np
-import config
+
 import argparse
 import torchvision
 import torch
@@ -31,7 +36,7 @@ kuzu_targets = KuzushijiDataLoader()
 
 kuzu = './data'
 
-transforms = [torchvision.transforms.Resize(config.img_size, config.img_size), torchvision.transforms.ToTensor()]
+transforms = [torchvision.transforms.Resize((img_size,img_size)), torchvision.transforms.ToTensor()]
 transforms_keep = [torchvision.transforms.Resize((32,32)), torchvision.transforms.ToTensor()]
 ##
 kuzu_data = ImageFolder(kuzu, transform=torchvision.transforms.Compose(transforms))
