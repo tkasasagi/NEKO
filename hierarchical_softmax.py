@@ -116,16 +116,18 @@ class HierarchicalSoftmaxUnetGenerator(nn.Module):
 
         p_y1_sm = sm(p_y1)
 
+
         char_loss = ce(p_y1, y1)
 
         for c in range(self.k1):
             w2_pick = self.w2[c]
             b2_pick = self.b2[c]
             ind = (y1 == c)
-            p_y2_y1 = torch.mm(h[ind], w2_pick) + b2_pick
-            p_y2_y1_sm = sm(p_y2_y1)
-            y2_pick = y2[ind]
-            char_loss += ce(p_y2_y1, y2_pick)
+            if h[ind].numel() > 0:
+                p_y2_y1 = torch.mm(h[ind], w2_pick) + b2_pick
+                p_y2_y1_sm = sm(p_y2_y1)
+                y2_pick = y2[ind]
+                char_loss += ce(p_y2_y1, y2_pick)
 
         return prox_loss + char_loss
 
@@ -153,16 +155,12 @@ class HierarchicalSoftmaxUnetGenerator(nn.Module):
             b2_pick = self.b2[c]
             ind = (max_ind == c)
 
-            p_y2_y1 = torch.mm(h[ind], w2_pick) + b2_pick
-            p_y2_y1_sm = sm(p_y2_y1)
-
-            max_prob_2, max_ind_2 = torch.max(p_y2_y1_sm,dim=1)
-
-            top_p[ind] = max_prob[ind] * max_prob_2
-            
-            print max_prob_2
-            
-            top_ind[ind] = (c*self.k2 + max_ind_2)
+            if h[ind].numel() > 0:
+                p_y2_y1 = torch.mm(h[ind], w2_pick) + b2_pick
+                p_y2_y1_sm = sm(p_y2_y1)
+                max_prob_2, max_ind_2 = torch.max(p_y2_y1_sm,dim=1)
+                top_p[ind] = max_prob[ind] * max_prob_2
+                top_ind[ind] = (c*self.k2 + max_ind_2)
 
         top_p = top_p.reshape((B,1,height,width))
         top_ind = top_ind.reshape((B,1,height,width))
@@ -171,19 +169,31 @@ class HierarchicalSoftmaxUnetGenerator(nn.Module):
 
 if __name__ == "__main__":
 
-    model = HierarchicalSoftmaxUnetGenerator(3, 64, num_characters=2, num_character_groups=1)
+    model = HierarchicalSoftmaxUnetGenerator(3, 64, num_characters=400, num_character_groups=5)
 
     hw = 32
 
-    x = torch.randn(1,3,hw,hw)
+    x = torch.randn(1,3,hw,hw)*0.01
     prox_target = torch.randint(0,1, size=(1,1,hw,hw))
-    char_target = torch.randint(0,2, size=(1,1,hw,hw))
+    char_target = torch.randint(399,400, size=(1,1,hw,hw))
 
-    l = model.loss(x,char_target,prox_target)
-    l.backward()
+    print char_target
+
+    opt = torch.optim.Adam(model.parameters())
+
+    for j in range(0,200):
+        l = model.loss(x,char_target,prox_target)
+        print l
+        l.backward()
+        opt.step()
+        opt.zero_grad()
+        top_p, top_ind, prox_output = model.predict(x)
+        print top_ind
 
     top_p, top_ind, prox_output = model.predict(x)
 
     print top_p.min(), top_p.max()
     print top_ind.min(), top_ind.max()
+
+
 
