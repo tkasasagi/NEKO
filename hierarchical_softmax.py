@@ -169,13 +169,13 @@ class HierarchicalSoftmaxUnetGenerator(nn.Module):
 
 if __name__ == "__main__":
 
-    model = HierarchicalSoftmaxUnetGenerator(3, 64, num_characters=400, num_character_groups=5)
+    model = HierarchicalSoftmaxUnetGenerator(3, 64, num_characters=4000, num_character_groups=40)
 
     hw = 32
 
     x = torch.randn(1,3,hw,hw)*0.01
     prox_target = torch.randint(0,1, size=(1,1,hw,hw))
-    char_target = torch.randint(399,400, size=(1,1,hw,hw))
+    char_target = torch.randint(3230,3231, size=(1,1,hw,hw))
 
     print char_target
 
