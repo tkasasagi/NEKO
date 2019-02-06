@@ -1,5 +1,5 @@
 image_size = 576
-MODELFILE = './model/lowest_loss (epoch43).pkl'
+MODELFILE = './model/lowest_loss576-409.pkl'
 
 fontpath = './resource/NotoSansCJKjp-Regular.otf'
 fontsize =  14
@@ -24,8 +24,8 @@ from functions import *
 font = ImageFont.truetype(fontpath, fontsize, encoding='utf-8')
 dictionary = pd.read_csv("./resource/dictionary.csv")
 datapath = "./testdata/"
-booklist = listdir(datapath)
-testlist = ["200015843", "200017458", "200021063", "200025191"]
+#booklist = listdir(datapath)
+booklist = ["200015843", "200017458", "200021063", "200025191"]
 booktp = []
 bookfp = []
 bookfn = []
@@ -38,12 +38,12 @@ for book in booklist:
     print(book)
     directory = datapath + book + "/images/"
     #GT
-    if book in testlist:
         gt = pd.read_csv("./testdata/" + book + "/" + book + "_coordinate.csv")
         size = pd.read_csv("./testdata/" + book + "/" + "imagesize.csv")
-    else:
-        gt = pd.read_csv("./traindata/" + book + "/" + book + "_coordinate.csv")
-        size = pd.read_csv("./traindata/" + book + "/" + "imagesize.csv")
+               
+    #else:
+        #gt = pd.read_csv("./traindata/" + book + "/" + book + "_coordinate.csv")
+        #size = pd.read_csv("./traindata/" + book + "/" + "imagesize.csv")
 
     checkdir(datapath + book + "/resized/")
     resized_directory = datapath + book + "/resized/"
@@ -166,7 +166,7 @@ for book in booklist:
                 
                 color = 'rgb(255, 0, 0)' 
                  
-                draw.text((x + 0, y - 0), character, fill=color, font = font)
+                draw.text((x + 10, y - 7), character, fill=color, font = font)
                 draw.rectangle(((x, y), (x + 2, y + 2)), fill="white")
                 
             image.save(datapath + book + "/ocr/" + file_name[0:-4] + ".jpg")
@@ -249,22 +249,6 @@ for book in booklist:
 
 f1df = pd.DataFrame()
 
-booklist.append("Sum")
-sumgt = sum(bookgt)
-sumpd = sum(bookpd)
-sumtp = sum(bookpd)
-sumfp = sum(bookpd)
-sumfn = sum(bookpd)
-sumf1 = f1score(sumtp, sumfp, sumfn)
-sumac = sum(bookac)/(len(booklist) + len(testlist))
-
-bookgt.append(sumgt)
-bookpd.append(sumpd)
-booktp.append(sumtp)
-bookfp.append(sumfp)
-bookfn.append(sumfn)
-bookf1.append(sumf1)
-bookac.append(sumac)
     
 f1df['book'] = booklist
 
